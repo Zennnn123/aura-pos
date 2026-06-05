@@ -9,6 +9,13 @@ let state = {
     masterItems: []
 };
 
+// Performance: cached formatter & debounce utility
+const _currencyFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
+function debounce(fn, ms) {
+    let t;
+    return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+}
+
 // Temporary storage for purchase being confirmed
 let pendingPurchaseData = null;
 
@@ -47,18 +54,29 @@ function loadData() {
 }
 
 // Save data to LocalStorage
+// Batched save — avoids redundant re-renders; callers update UI themselves
+let _saveQueued = false;
 function saveData() {
-    localStorage.setItem('aura_pos_purchases', JSON.stringify(state.purchases));
-    localStorage.setItem('aura_pos_sales', JSON.stringify(state.sales));
-    localStorage.setItem('aura_pos_workers', JSON.stringify(state.workers));
-    localStorage.setItem('aura_pos_pending', JSON.stringify(state.pendingRequests));
-    localStorage.setItem('aura_pos_categories', JSON.stringify(state.categories));
-    localStorage.setItem('aura_pos_logs', JSON.stringify(state.auditLogs));
-    localStorage.setItem('aura_pos_master_items', JSON.stringify(state.masterItems));
-    
-    updateDashboard();
+    if (_saveQueued) return;
+    _saveQueued = true;
+    requestAnimationFrame(() => {
+        localStorage.setItem('aura_pos_purchases', JSON.stringify(state.purchases));
+        localStorage.setItem('aura_pos_sales', JSON.stringify(state.sales));
+        localStorage.setItem('aura_pos_workers', JSON.stringify(state.workers));
+        localStorage.setItem('aura_pos_pending', JSON.stringify(state.pendingRequests));
+        localStorage.setItem('aura_pos_categories', JSON.stringify(state.categories));
+        localStorage.setItem('aura_pos_logs', JSON.stringify(state.auditLogs));
+        localStorage.setItem('aura_pos_master_items', JSON.stringify(state.masterItems));
+        _saveQueued = false;
+    });
+    // Lightweight refresh — only active section
+    const activeNav = document.querySelector('.nav-item.active');
+    const target = activeNav ? activeNav.getAttribute('data-target') : '';
+    if (target === 'dashboard-section') updateDashboard();
+    else if (target === 'purchases-section') renderPurchasesTable();
+    else if (target === 'sales-section') renderSalesTable();
+    else if (target === 'admin-section') refreshAdminPanel();
     populateBrandSuggestions();
-    refreshAdminPanel();
 }
 
 // Navigation Handling
@@ -368,9 +386,10 @@ function initEventListeners() {
     });
 
     // Filters & Searches
-    document.getElementById('purchase-search').addEventListener('input', renderPurchasesTable);
+    // Debounced search inputs for performance
+    document.getElementById('purchase-search').addEventListener('input', debounce(renderPurchasesTable, 200));
     document.getElementById('purchase-filter-cheque').addEventListener('change', renderPurchasesTable);
-    document.getElementById('sales-search').addEventListener('input', renderSalesTable);
+    document.getElementById('sales-search').addEventListener('input', debounce(renderSalesTable, 200));
     document.getElementById('sales-filter-balance').addEventListener('change', renderSalesTable);
 
     // Chart Timeframe Change
@@ -1064,7 +1083,7 @@ function renderChart() {
 
 // Utility Formatter helpers
 function formatCurrency(val) {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(val);
+    return _currencyFmt.format(val);
 }
 
 function formatDate(dateStr) {
