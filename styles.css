@@ -6,8 +6,8 @@
     --bg-tertiary: #f2ebe9; /* Soft warm gray-brown */
     --accent-primary: #de3535; /* Crimson Red matching active buttons */
     --accent-primary-hover: #bd2020;
-    --accent-success: #4f46e5; /* Indigo highlight blue */
-    --accent-success-hover: #4338ca;
+    --accent-success: #2b4ea2;
+    --accent-success-hover: #213f82;
     --accent-warning: #d97706; /* Amber */
     --accent-danger: #dc2626; /* Rose */
     
@@ -314,7 +314,7 @@ body {
 }
 
 .kpi-icon-container.purchases {
-    background-color: rgba(99, 102, 241, 0.15);
+    background-color: rgba(43, 78, 162, 0.15);
     color: var(--accent-primary);
 }
 
@@ -662,9 +662,9 @@ body {
 }
 
 .badge-paid {
-    background-color: rgba(79, 70, 229, 0.08);
-    color: #4f46e5;
-    border: 1px solid rgba(79, 70, 229, 0.15);
+    background-color: rgba(43, 78, 162, 0.08);
+    color: #2b4ea2;
+    border: 1px solid rgba(43, 78, 162, 0.15);
 }
 
 .badge-pending {
@@ -680,9 +680,9 @@ body {
 }
 
 .badge-info {
-    background-color: rgba(79, 70, 229, 0.08);
-    color: #4338ca;
-    border: 1px solid rgba(79, 70, 229, 0.15);
+    background-color: rgba(43, 78, 162, 0.08);
+    color: #213f82;
+    border: 1px solid rgba(43, 78, 162, 0.15);
 }
 
 .row-actions {
@@ -1338,7 +1338,7 @@ body {
 .user-avatar-dot {
     width: 10px;
     height: 10px;
-    background-color: #4f46e5; /* Indigo highlight dot */
+    background-color: #2b4ea2;
     border-radius: var(--radius-full);
 }
 .user-name {
