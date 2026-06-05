@@ -12,10 +12,23 @@
         <aside class="sidebar" id="sidebar">
             <div class="logo-container">
                 <div class="logo-icon">
-                    <!-- POS Box icon -->
-                    <svg viewBox="0 0 24 24">
-                        <path d="M2 17V7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" />
-                        <path d="M12 9v6M9 12h6" />
+                    <!-- Cute winking house mascot SVG logo -->
+                    <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                        <!-- Roof -->
+                        <path d="M 12 44 L 50 12 L 88 44 Z" fill="#ffffff" stroke="#2b1b19" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" />
+                        <!-- Chimney/antenna -->
+                        <line x1="50" y1="12" x2="50" y2="3" stroke="#2b1b19" stroke-width="6" stroke-linecap="round" />
+                        <!-- Main Body -->
+                        <rect x="18" y="44" width="64" height="48" rx="12" ry="12" fill="#ffffff" stroke="#2b1b19" stroke-width="6" stroke-linejoin="round" />
+                        <!-- Wink Left Eye -->
+                        <path d="M 28 65 L 34 60 L 28 55" fill="none" stroke="#2b1b19" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Right Eye -->
+                        <circle cx="66" cy="60" r="5" fill="#2b1b19" />
+                        <!-- Smile -->
+                        <path d="M 43 72 Q 50 78 57 72" fill="none" stroke="#2b1b19" stroke-width="5" stroke-linecap="round" />
+                        <!-- Cheeks -->
+                        <ellipse cx="26" cy="71" rx="7" ry="5" fill="#f59a9e" />
+                        <ellipse cx="74" cy="71" rx="7" ry="5" fill="#f59a9e" />
                     </svg>
                 </div>
                 <span class="logo-text">AURA POS</span>
@@ -46,6 +59,12 @@
                         Data Settings
                     </button>
                 </li>
+                <li class="nav-item" data-target="admin-section">
+                    <button>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Admin Panel
+                    </button>
+                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -70,6 +89,15 @@
                     <p id="section-subtitle">Real-time statistics & summary of ledger activities.</p>
                 </div>
                 <div class="header-actions">
+                    <!-- User Profile Badge matching screenshot -->
+                    <div class="user-profile-pill">
+                        <span class="user-avatar-dot"></span>
+                        <span class="user-name">admin</span>
+                        <button class="btn btn-danger btn-sm" id="logout-btn" style="padding: 0.25rem 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                            Logout
+                        </button>
+                    </div>
                     <button class="btn btn-secondary" id="quick-export-btn">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                         Backup CSV
@@ -321,6 +349,268 @@
                             <div style="display: flex; gap: 0.75rem;">
                                 <button class="btn btn-secondary" id="seed-demo-data">Seed Demo Ledger</button>
                                 <button class="btn btn-danger" id="clear-database-btn">Clear All Records</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Section -->
+            <section id="admin-section" class="page-section">
+                <!-- Header Card matching design -->
+                <div class="admin-header-card">
+                    <div class="admin-shield-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h2>Admin Panel</h2>
+                    <p>Manage workers, items, categories & settings</p>
+                </div>
+
+                <!-- Subtabs Navigation -->
+                <div class="admin-tabs-container">
+                    <div class="admin-subtabs">
+                        <button class="admin-subtab active" data-subtab="workers-tab">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Workers
+                        </button>
+                        <button class="admin-subtab" data-subtab="items-tab">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Items
+                        </button>
+                        <button class="admin-subtab" data-subtab="categories-tab">
+                            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 20H2v-5"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            Categories
+                        </button>
+                        <button class="admin-subtab" data-subtab="logs-tab">
+                            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            Logs
+                        </button>
+                        <button class="admin-subtab" data-subtab="security-tab">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Security
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panels content -->
+                <!-- 1. Workers Panel -->
+                <div id="workers-tab-content" class="admin-panel-content active">
+                    <div class="form-grid">
+                        <!-- Add Worker Account Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">+ Add Worker Account</h3>
+                            </div>
+                            <form id="add-worker-form">
+                                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <label for="worker-email" style="font-weight: 500; font-size: 0.9rem;">Email</label>
+                                        <input type="email" id="worker-email" class="form-input" placeholder="worker@gmail.com" required>
+                                    </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <label for="worker-password" style="font-weight: 500; font-size: 0.9rem;">Password</label>
+                                        <div class="password-input-container">
+                                            <input type="password" id="worker-password" class="form-input" placeholder="Set password..." required>
+                                            <button type="button" class="password-toggle-btn" id="worker-password-toggle">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="justify-content: center; margin-top: 0.5rem;">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Add Worker
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Pending Access Requests Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Pending Access Requests (<span id="pending-requests-count">0</span>)</h3>
+                            </div>
+                            <div id="pending-requests-container" style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 120px; justify-content: center;">
+                                <!-- Dynamically populated list -->
+                                <div class="empty-state" style="padding: 1.5rem;">
+                                    <svg viewBox="0 0 24 24" style="color: var(--accent-success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    <p>No pending signup requests right now.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workers List Card -->
+                        <div class="card full-width">
+                            <div class="card-header">
+                                <h3 class="card-title">Workers (<span id="workers-count">0</span>)</h3>
+                            </div>
+                            <div class="table-container">
+                                <table class="pos-table" id="workers-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Date Joined</th>
+                                            <th style="text-align: right;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="workers-tbody">
+                                        <!-- Dynamically generated rows -->
+                                    </tbody>
+                                </table>
+                                <div id="workers-empty-state" class="empty-state" style="display: flex; padding: 2rem;">
+                                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <p>No worker accounts configured. Create an account above to seed your team.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Items Panel -->
+                <div id="items-tab-content" class="admin-panel-content">
+                    <div class="form-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Create Master Item</h3>
+                            </div>
+                            <form id="admin-add-item-form">
+                                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <label for="admin-item-name" style="font-weight: 500; font-size: 0.9rem;">Item Name *</label>
+                                        <input type="text" id="admin-item-name" class="form-input" placeholder="e.g. Premium Leather Boots" required>
+                                    </div>
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <label for="admin-item-price" style="font-weight: 500; font-size: 0.9rem;">Unit Price (₹) *</label>
+                                        <input type="number" id="admin-item-price" class="form-input" min="0.01" step="0.01" placeholder="0.00" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="justify-content: center; margin-top: 0.5rem;">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Save Master Item
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Item Catalog Summary</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.5;">
+                                    Below is a summary of distinct items logged inside transactions. Create new master items to pre-register products.
+                                </p>
+                                <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                                    <table class="pos-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item Name</th>
+                                                <th style="text-align: right;">Last Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="admin-items-summary-tbody">
+                                            <!-- Dynamic content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Categories Panel -->
+                <div id="categories-tab-content" class="admin-panel-content">
+                    <div class="form-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Create Product Category</h3>
+                            </div>
+                            <form id="admin-add-category-form">
+                                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <label for="admin-category-name" style="font-weight: 500; font-size: 0.9rem;">Category Name *</label>
+                                        <input type="text" id="admin-category-name" class="form-input" placeholder="e.g. Apparel" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="justify-content: center; margin-top: 0.5rem;">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Save Category
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Current Categories (<span id="categories-count">0</span>)</h3>
+                            </div>
+                            <div class="table-container">
+                                <table class="pos-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Category Name</th>
+                                            <th style="text-align: right;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-categories-tbody">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Logs Panel -->
+                <div id="logs-tab-content" class="admin-panel-content">
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <h3 class="card-title">Security & Action Audit Logs</h3>
+                            <button class="btn btn-secondary btn-sm" id="clear-logs-btn">Clear Logs</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; max-height: 450px; overflow-y: auto;" id="admin-logs-container">
+                            <!-- Dynamic Audit trail list -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Security Panel -->
+                <div id="security-tab-content" class="admin-panel-content">
+                    <div class="form-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">System Settings</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                <label class="switch-container">
+                                    <input type="checkbox" class="switch-input" id="setting-auto-backup" checked>
+                                    <div class="switch-track"><div class="switch-thumb"></div></div>
+                                    <span class="switch-label">Auto backup before reset</span>
+                                </label>
+                                <label class="switch-container">
+                                    <input type="checkbox" class="switch-input" id="setting-debug-mode">
+                                    <div class="switch-track"><div class="switch-thumb"></div></div>
+                                    <span class="switch-label">Enable verbose console log</span>
+                                </label>
+                                <label class="switch-container">
+                                    <input type="checkbox" class="switch-input" id="setting-cheque-warning" checked>
+                                    <div class="switch-track"><div class="switch-thumb"></div></div>
+                                    <span class="switch-label">Require manual verification checkbox for cheques</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Admin Account Security</h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.5;">
+                                    Change the administrator master credentials. Default session role is "Administrator".
+                                </p>
+                                <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <label style="font-weight: 500; font-size: 0.85rem;">Master Role Title</label>
+                                    <input type="text" class="form-input" id="admin-role-input" value="Administrator">
+                                </div>
+                                <button class="btn btn-secondary" id="save-security-settings-btn" style="justify-content: center;">Save Credentials</button>
                             </div>
                         </div>
                     </div>

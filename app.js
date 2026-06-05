@@ -1,7 +1,12 @@
 // State Management
 let state = {
     purchases: [],
-    sales: []
+    sales: [],
+    workers: [],
+    pendingRequests: [],
+    categories: [],
+    auditLogs: [],
+    masterItems: []
 };
 
 // Temporary storage for purchase being confirmed
@@ -16,23 +21,44 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPurchasesTable();
     renderSalesTable();
     populateBrandSuggestions();
+    
+    // Seed initial values for Admin Panel if not present
+    seedAdminInitialData();
+    refreshAdminPanel();
 });
 
 // Load data from LocalStorage
 function loadData() {
     const localPurchases = localStorage.getItem('aura_pos_purchases');
     const localSales = localStorage.getItem('aura_pos_sales');
+    const localWorkers = localStorage.getItem('aura_pos_workers');
+    const localPending = localStorage.getItem('aura_pos_pending');
+    const localCategories = localStorage.getItem('aura_pos_categories');
+    const localLogs = localStorage.getItem('aura_pos_logs');
+    const localMasterItems = localStorage.getItem('aura_pos_master_items');
     
     state.purchases = localPurchases ? JSON.parse(localPurchases) : [];
     state.sales = localSales ? JSON.parse(localSales) : [];
+    state.workers = localWorkers ? JSON.parse(localWorkers) : [];
+    state.pendingRequests = localPending ? JSON.parse(localPending) : [];
+    state.categories = localCategories ? JSON.parse(localCategories) : [];
+    state.auditLogs = localLogs ? JSON.parse(localLogs) : [];
+    state.masterItems = localMasterItems ? JSON.parse(localMasterItems) : [];
 }
 
 // Save data to LocalStorage
 function saveData() {
     localStorage.setItem('aura_pos_purchases', JSON.stringify(state.purchases));
     localStorage.setItem('aura_pos_sales', JSON.stringify(state.sales));
+    localStorage.setItem('aura_pos_workers', JSON.stringify(state.workers));
+    localStorage.setItem('aura_pos_pending', JSON.stringify(state.pendingRequests));
+    localStorage.setItem('aura_pos_categories', JSON.stringify(state.categories));
+    localStorage.setItem('aura_pos_logs', JSON.stringify(state.auditLogs));
+    localStorage.setItem('aura_pos_master_items', JSON.stringify(state.masterItems));
+    
     updateDashboard();
     populateBrandSuggestions();
+    refreshAdminPanel();
 }
 
 // Navigation Handling
@@ -89,7 +115,13 @@ function initNavigation() {
                 sectionTitle.textContent = 'Database Settings';
                 sectionSubtitle.textContent = 'Export files, import backups, seed test environments, or clear memory.';
                 quickActionBtn.style.display = 'none';
+            } else if (target === 'admin-section') {
+                sectionTitle.textContent = 'Admin Control Panel';
+                sectionSubtitle.textContent = 'Manage workers, configure categories, audit action logs, and system preferences.';
+                quickActionBtn.style.display = 'none';
+                refreshAdminPanel();
             }
+
 
             // Close sidebar on mobile
             const sidebar = document.getElementById('sidebar');
@@ -368,6 +400,124 @@ function initEventListeners() {
 
     document.getElementById('seed-demo-data').addEventListener('click', seedDemoDatabase);
     document.getElementById('clear-database-btn').addEventListener('click', clearDatabase);
+
+    // Admin Panel sub-tabs navigation toggle
+    const subtabs = document.querySelectorAll('.admin-subtab');
+    const panels = document.querySelectorAll('.admin-panel-content');
+    subtabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.getAttribute('data-subtab');
+            
+            subtabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            panels.forEach(p => {
+                if (p.id === targetTab + '-content') {
+                    p.classList.add('active');
+                } else {
+                    p.classList.remove('active');
+                }
+            });
+            refreshAdminPanel();
+        });
+    });
+
+    // Add Worker Account Submission
+    document.getElementById('add-worker-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('worker-email').value.trim();
+        const password = document.getElementById('worker-password').value;
+        
+        if (state.workers.some(w => w.email.toLowerCase() === email.toLowerCase())) {
+            alert('A worker with this email address already exists.');
+            return;
+        }
+        
+        const newWorker = {
+            id: 'wk_' + Date.now(),
+            email,
+            role: 'Worker',
+            password,
+            joined: new Date().toISOString().split('T')[0]
+        };
+        
+        state.workers.push(newWorker);
+        logAuditEvent(`Created worker account: ${email}`, 'create');
+        saveData();
+        
+        document.getElementById('add-worker-form').reset();
+    });
+
+    // Toggle password visibility winking icon logic
+    document.getElementById('worker-password-toggle').addEventListener('click', () => {
+        const pwdInput = document.getElementById('worker-password');
+        const icon = document.querySelector('#worker-password-toggle svg');
+        if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M2 2l20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+        } else {
+            pwdInput.type = 'password';
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        }
+    });
+
+    // Create Master Item Form Handler
+    document.getElementById('admin-add-item-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('admin-item-name').value.trim();
+        const price = parseFloat(document.getElementById('admin-item-price').value);
+        
+        if (state.masterItems.some(item => item.name.toLowerCase() === name.toLowerCase())) {
+            alert('An item with this name already exists in the master catalog.');
+            return;
+        }
+        
+        state.masterItems.push({ name, price });
+        logAuditEvent(`Added master item catalog: ${name} (₹${price.toFixed(2)})`, 'create');
+        saveData();
+        document.getElementById('admin-add-item-form').reset();
+    });
+
+    // Add Product Category Form Handler
+    document.getElementById('admin-add-category-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('admin-category-name').value.trim();
+        
+        if (state.categories.some(c => c.toLowerCase() === name.toLowerCase())) {
+            alert('This category already exists.');
+            return;
+        }
+        
+        state.categories.push(name);
+        logAuditEvent(`Created product category: ${name}`, 'create');
+        saveData();
+        document.getElementById('admin-add-category-form').reset();
+    });
+
+    // Purge Logs Action
+    document.getElementById('clear-logs-btn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to purge all action audit logs?')) {
+            state.auditLogs = [];
+            saveData();
+        }
+    });
+
+    // Logout Button Action Simulation
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        alert('Logout simulation: Session ended. You will now be redirected to the dashboard.');
+        const dashboardTab = document.querySelector('[data-target="dashboard-section"]');
+        if (dashboardTab) dashboardTab.click();
+    });
+
+    // Update Master Title/Role credentials settings
+    document.getElementById('save-security-settings-btn').addEventListener('click', () => {
+        const newRole = document.getElementById('admin-role-input').value.trim();
+        if (newRole) {
+            document.querySelector('.client-role').textContent = newRole;
+            logAuditEvent(`Admin role configuration updated to: ${newRole}`, 'system');
+            alert('Security configurations successfully updated.');
+        }
+    });
 }
 
 // Save Purchase operation helper
@@ -1094,3 +1244,263 @@ function clearDatabase() {
         alert('Ledger database successfully reset.');
     }
 }
+
+// Seed initial admin data if empty
+function seedAdminInitialData() {
+    if (state.workers.length === 0) {
+        state.workers = [
+            { id: 'wk_1', email: 'manager@aurapos.com', role: 'Manager', joined: '2026-05-15' },
+            { id: 'wk_2', email: 'worker.george@aurapos.com', role: 'Worker', joined: '2026-06-01' }
+        ];
+        logAuditEvent('System initialized: Seeded default worker accounts.', 'system');
+    }
+    if (state.pendingRequests.length === 0 && localStorage.getItem('aura_pos_pending') === null) {
+        state.pendingRequests = [
+            { email: 'alex.signup@gmail.com', date: '2026-06-04' },
+            { email: 'jane.pos@outlook.com', date: '2026-06-05' }
+        ];
+    }
+    if (state.categories.length === 0) {
+        state.categories = ['Apparel', 'Footwear', 'Electronics', 'Services'];
+    }
+    if (state.masterItems.length === 0) {
+        state.masterItems = [
+            { name: 'Air Zoom Running Shoes', price: 9800.00 },
+            { name: 'UltraBoost Athletic Trainer', price: 14700.00 },
+            { name: 'MacBook Pro 16 M3 Max', price: 289000.00 },
+            { name: 'Sony Playstation 5', price: 54999.00 }
+        ];
+    }
+    
+    // Save seeded defaults to LocalStorage directly on initialization
+    localStorage.setItem('aura_pos_workers', JSON.stringify(state.workers));
+    localStorage.setItem('aura_pos_pending', JSON.stringify(state.pendingRequests));
+    localStorage.setItem('aura_pos_categories', JSON.stringify(state.categories));
+    localStorage.setItem('aura_pos_master_items', JSON.stringify(state.masterItems));
+}
+
+// Log audit events
+function logAuditEvent(message, type = 'info') {
+    const logEntry = {
+        id: 'log_' + Date.now() + Math.random().toString(36).substr(2, 4),
+        message,
+        type,
+        timestamp: new Date().toISOString()
+    };
+    state.auditLogs.unshift(logEntry);
+    if (state.auditLogs.length > 50) {
+        state.auditLogs.pop(); // Cap at 50 logs
+    }
+}
+
+// Refresh all components of the Admin Panel
+function refreshAdminPanel() {
+    renderWorkersTable();
+    renderPendingRequests();
+    renderCategoriesTable();
+    renderLogs();
+    renderItemsSummary();
+}
+
+// Render Workers List
+function renderWorkersTable() {
+    const tbody = document.getElementById('workers-tbody');
+    const emptyState = document.getElementById('workers-empty-state');
+    const countSpan = document.getElementById('workers-count');
+    
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    countSpan.textContent = state.workers.length;
+    
+    if (state.workers.length === 0) {
+        emptyState.style.display = 'flex';
+        return;
+    }
+    emptyState.style.display = 'none';
+    
+    state.workers.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 600;">${escapeHTML(w.email)}</td>
+            <td><span class="badge ${w.role === 'Manager' ? 'badge-info' : 'badge-paid'}">${escapeHTML(w.role)}</span></td>
+            <td>${formatDate(w.joined)}</td>
+            <td style="text-align: right;">
+                <button class="action-btn delete" onclick="deleteWorker('${w.id}')" title="Delete Worker Account">
+                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Delete Worker helper
+function deleteWorker(id) {
+    const worker = state.workers.find(w => w.id === id);
+    if (!worker) return;
+    
+    if (confirm(`Are you sure you want to delete worker account: ${worker.email}?`)) {
+        state.workers = state.workers.filter(w => w.id !== id);
+        logAuditEvent(`Deleted worker account: ${worker.email}`, 'delete');
+        saveData();
+    }
+}
+
+// Render Pending Requests Card
+function renderPendingRequests() {
+    const container = document.getElementById('pending-requests-container');
+    const countSpan = document.getElementById('pending-requests-count');
+    
+    if (!container) return;
+    container.innerHTML = '';
+    
+    countSpan.textContent = state.pendingRequests.length;
+    
+    if (state.pendingRequests.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: 1.5rem;">
+                <svg viewBox="0 0 24 24" style="color: var(--accent-success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <p>No pending signup requests right now.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    state.pendingRequests.forEach(req => {
+        const div = document.createElement('div');
+        div.className = 'pending-request-item';
+        div.innerHTML = `
+            <div class="pending-request-info">
+                <span class="pending-request-email">${escapeHTML(req.email)}</span>
+                <span class="pending-request-date">Requested: ${formatDate(req.date)}</span>
+            </div>
+            <div class="pending-request-actions">
+                <button class="btn btn-success btn-sm" onclick="approvePendingRequest('${escapeHTML(req.email)}')" style="padding: 0.35rem 0.65rem;">Approve</button>
+                <button class="btn btn-secondary btn-sm" onclick="deletePendingRequest('${escapeHTML(req.email)}')" style="padding: 0.35rem 0.65rem;">Dismiss</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Approve pending request helper
+function approvePendingRequest(email) {
+    const request = state.pendingRequests.find(r => r.email === email);
+    if (!request) return;
+    
+    // Add to workers list
+    const newWorker = {
+        id: 'wk_' + Date.now(),
+        email: request.email,
+        role: 'Worker',
+        password: 'workerTempPass123',
+        joined: new Date().toISOString().split('T')[0]
+    };
+    
+    state.workers.push(newWorker);
+    state.pendingRequests = state.pendingRequests.filter(r => r.email !== email);
+    logAuditEvent(`Approved and created account for worker: ${email}`, 'create');
+    saveData();
+}
+
+// Reject/Dismiss pending request
+function deletePendingRequest(email) {
+    if (confirm(`Dismiss pending access request from: ${email}?`)) {
+        state.pendingRequests = state.pendingRequests.filter(r => r.email !== email);
+        logAuditEvent(`Dismissed access request from: ${email}`, 'delete');
+        saveData();
+    }
+}
+
+// Render Categories List
+function renderCategoriesTable() {
+    const tbody = document.getElementById('admin-categories-tbody');
+    const countSpan = document.getElementById('categories-count');
+    
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    countSpan.textContent = state.categories.length;
+    
+    if (state.categories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2" class="text-muted" style="text-align: center;">No categories configured.</td></tr>`;
+        return;
+    }
+    
+    state.categories.forEach((cat, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 600;">${escapeHTML(cat)}</td>
+            <td style="text-align: right;">
+                <button class="action-btn delete" onclick="deleteCategory(${index})" title="Delete Category">
+                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Delete Category
+function deleteCategory(index) {
+    const catName = state.categories[index];
+    if (confirm(`Are you sure you want to delete category: ${catName}?`)) {
+        state.categories.splice(index, 1);
+        logAuditEvent(`Deleted category: ${catName}`, 'delete');
+        saveData();
+    }
+}
+
+// Render Audit Logs list
+function renderLogs() {
+    const container = document.getElementById('admin-logs-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (state.auditLogs.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding: 2rem;"><p>Audit trail is empty.</p></div>`;
+        return;
+    }
+    
+    state.auditLogs.forEach(log => {
+        const div = document.createElement('div');
+        div.className = 'audit-log-item';
+        
+        let timeStr = '-';
+        try {
+            timeStr = new Date(log.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' }) + ' ' + formatDate(log.timestamp);
+        } catch(e) {}
+        
+        div.innerHTML = `
+            <span class="audit-log-indicator ${escapeHTML(log.type)}"></span>
+            <div class="audit-log-details">
+                <span class="audit-log-message">${escapeHTML(log.message)}</span>
+                <span class="audit-log-timestamp">${timeStr}</span>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Render Master items summary list
+function renderItemsSummary() {
+    const tbody = document.getElementById('admin-items-summary-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    if (state.masterItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2" class="text-muted" style="text-align: center;">Master items list is empty.</td></tr>`;
+        return;
+    }
+    
+    state.masterItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHTML(item.name)}</td>
+            <td style="text-align: right; font-weight: 700;">${formatCurrency(item.price)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+

@@ -1,0 +1,10 @@
+{
+  "name": "aura-pos",
+  "version": "1.0.0",
+  "description": "Enterprise POS Dashboard",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve -l 8000"
+  },
+  "dependencies": {}
+}
